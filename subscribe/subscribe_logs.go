@@ -63,7 +63,7 @@ func Logs(
 
 	logsCh := make(chan types.Log)
 
-	filter := map[string]interface{}{
+	filter := map[string]any{
 		"address": contractAddress,
 		"topics": [][]common.Hash{
 			{transferEvent.ID},
@@ -202,6 +202,7 @@ func printEvent(subscribe types.Log, eventSig abi.Event, values []any) {
 			continue
 		}
 
+		// 这里遍历的是value，非indexed 标记的都会存到 values 中，索引从0开会时
 		if dataIndex >= len(values) {
 			continue
 		}
@@ -219,75 +220,4 @@ func printEvent(subscribe types.Log, eventSig abi.Event, values []any) {
 
 		dataIndex++
 	}
-}
-
-// Topics[0] = Transfer/Approved 事件签名
-// Topics[1] = from /owner
-// Topics[2] = to spender
-// Data      = value
-// eventSig.Inputs[0] -> subscribe.Topics[1] // from / owner
-// eventSig.Inputs[1] -> subscribe.Topics[2] // to / spender
-// eventSig.Inputs[2] -> subscribe.Data      // value
-func printIndexed(subscribe types.Log, eventSig abi.Event, indexed *bool) {
-	for i := range 3 {
-		input := eventSig.Inputs[i]
-		if indexed != nil && input.Indexed != *indexed {
-			continue
-		}
-		topic := subscribe.Topics[i+1]
-
-		switch input.Type.T {
-		case abi.AddressTy:
-			addr := common.BytesToAddress(topic.Bytes())
-			fmt.Printf(" [%d],%s(%s):%s\n", i, input.Name, input.Type, addr.Hex())
-		case abi.IntTy, abi.UintTy:
-			value := new(big.Int).SetBytes(topic.Bytes())
-			fmt.Printf(" [%d],%s(%s):%s\n", i, input.Name, input.Type, value)
-		case abi.BoolTy:
-			fmt.Printf("  %t\n", topic[31] != 0)
-		default:
-			fmt.Printf(" Unknown type: %s\n", topic.Hex())
-		}
-	}
-}
-
-// Topics[0] = Transfer/Approved 事件签名
-// Topics[1] = from /owner
-// Topics[2] = to spender
-// Data      = value
-// 这里就是将 交易记录中的 data 中的数据输出
-func printNonIndexed(subscribe types.Log, eventSig abi.Event, values []any) {
-	if len(subscribe.Data) == 0 {
-		return
-	}
-	nonIndexedInputs := make([]abi.Argument, 0)
-	for _, input := range eventSig.Inputs {
-		if !input.Indexed {
-			nonIndexedInputs = append(nonIndexedInputs, input)
-		}
-	}
-
-	if len(nonIndexedInputs) == 0 {
-		return
-	}
-	nonIndexedIdx := 0
-	for i, input := range eventSig.Inputs {
-		if !input.Indexed {
-			if nonIndexedIdx < len(nonIndexedInputs) {
-				value := values[nonIndexedIdx]
-				switch t := value.(type) {
-				case *big.Int:
-					fmt.Printf(" [%d],%s(%s): %s\n", i, input.Name, input.Type, t.String())
-				case common.Address:
-					fmt.Printf("  %s\n", t.Hex())
-				case []byte:
-					fmt.Printf("  %x\n", t)
-				default:
-					fmt.Printf("Unknown type: %v\n", t)
-				}
-				nonIndexedIdx++
-			}
-		}
-	}
-
 }
