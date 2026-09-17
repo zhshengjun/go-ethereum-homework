@@ -22,7 +22,7 @@ func TestSubscribeLogsIntegration(t *testing.T) {
 		t.Fatalf("contract %s is not deployed on the configured network", usdc)
 	}
 
-	err = SubscribeLogs(ctx, client, usdc, 0)
+	err = Logs(ctx, client, usdc, 0)
 	if err != nil && !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(strings.ReplaceAll(err.Error(), endpoint, "<rpc-wss>"))
 	}

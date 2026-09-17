@@ -13,10 +13,12 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// SendTransaction 测试再go中使用 client 发送交易
 func SendTransaction(ctx context.Context, client *ethclient.Client,
 	private string, to string, amount float64, input []byte) {
+	// 目标地址
 	toAddress := common.HexToAddress(to)
-
+	// 私钥
 	privateKey, err := crypto.HexToECDSA(private)
 	if err != nil {
 		log.Fatal(err)

@@ -13,14 +13,15 @@ import (
 )
 
 func RPCURL(t testing.TB) string {
-	return rpcValue(t, "rpc.url")
+	return configValue(t, "rpc.url")
 }
 
 func RPCWSS(t testing.TB) string {
-	return rpcValue(t, "rpc.wss")
+	return configValue(t, "rpc.wss")
 }
 
-func rpcValue(t testing.TB, key string) string {
+// configValue 获取配置值
+func configValue(t testing.TB, key string) string {
 	t.Helper()
 
 	_, file, _, ok := runtime.Caller(0)
@@ -43,27 +44,25 @@ func rpcValue(t testing.TB, key string) string {
 
 func IntegrationClient(t *testing.T) (context.Context, *ethclient.Client, string) {
 	t.Helper()
-
-	endpoint := RPCURL(t)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	t.Cleanup(cancel)
-
-	client, err := ethclient.DialContext(ctx, endpoint)
-	if err != nil {
-		t.Fatal(RedactRPCError(err, endpoint))
-	}
-	t.Cleanup(client.Close)
-
-	return ctx, client, endpoint
+	return integrationClient(t, RPCURL, 10*time.Second)
 }
 
 func IntegrationWSSClient(t *testing.T) (context.Context, *ethclient.Client, string) {
 	t.Helper()
+	return integrationClient(t, RPCWSS, 15*time.Second)
+}
 
-	endpoint := RPCWSS(t)
+func integrationClient(
+	t *testing.T,
+	endpointFunc func(testing.TB) string,
+	timeout time.Duration,
+) (context.Context, *ethclient.Client, string) {
+	t.Helper()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	endpoint := endpointFunc(t)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	// 这里现注册清理逻辑，测试结束后会调用函数
 	t.Cleanup(cancel)
 
 	client, err := ethclient.DialContext(ctx, endpoint)
@@ -79,13 +78,22 @@ func RedactRPCError(err error, endpoint string) string {
 	return strings.ReplaceAll(err.Error(), endpoint, "<rpc-url>")
 }
 
-func TransactionHash(t testing.TB) string {
-	return rpcValue(t, "transaction.hash")
+// TransactionHashHex 获取交易hash
+func TransactionHashHex(t testing.TB) string {
+	return configValue(t, "transaction.hash")
 }
 
-func Accoun(t testing.TB) (string, string) {
-	address := rpcValue(t, "account.to.address")
-	private := rpcValue(t, "account.from.private")
+// AccountFrom 获取账号
+func AccountFrom(t testing.TB) (string, string) {
+	address := configValue(t, "account.from.address")
+	private := configValue(t, "account.from.private")
+
+	return address, private
+}
+
+func AccountTo(t testing.TB) (string, string) {
+	address := configValue(t, "account.to.address")
+	private := configValue(t, "account.to.private")
 
 	return address, private
 }

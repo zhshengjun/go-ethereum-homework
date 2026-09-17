@@ -14,7 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-const erc20ABI_Json = `
+const erc20ABI_Event_Json = `
 [
 	{
 		"anonymous": false,
@@ -39,14 +39,14 @@ const erc20ABI_Json = `
 ]
 `
 
-func SubscribeLogs(
+func Logs(
 	ctx context.Context,
 	client *ethclient.Client,
 	contractAddress common.Address,
 	maxLogs int,
 ) error {
 
-	parsedABI, err := abi.JSON(strings.NewReader(erc20ABI_Json))
+	parsedABI, err := abi.JSON(strings.NewReader(erc20ABI_Event_Json))
 	if err != nil {
 		return err
 	}

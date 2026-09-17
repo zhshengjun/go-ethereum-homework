@@ -9,7 +9,7 @@ import (
 
 func TestRecord(t *testing.T) {
 	ctx, client, _ := testutil.IntegrationWSSClient(t)
-	txHash := testutil.TransactionHash(t)
+	txHash := testutil.TransactionHashHex(t)
 	if common.HexToHash(txHash) == (common.Hash{}) {
 		t.Skip("set transaction.hash in config.yaml")
 	}

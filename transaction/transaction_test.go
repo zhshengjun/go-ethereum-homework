@@ -8,13 +8,14 @@ import (
 func TestSendTransaction(t *testing.T) {
 
 	ctx, client, _ := testutil.IntegrationWSSClient(t)
-	address, privateKey := testutil.Accoun(t)
+	_, privateKey := testutil.AccountFrom(t)
+	address, _ := testutil.AccountTo(t)
 	SendTransaction(
 		ctx,
 		client,
 		privateKey,
 		address,
-		0.001,
+		0.0001,
 		nil,
 	)
 }

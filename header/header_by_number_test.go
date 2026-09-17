@@ -11,7 +11,7 @@ import (
 func TestHeaderByNumberIntegration(t *testing.T) {
 	ctx, client, endpoint := testutil.IntegrationClient(t)
 
-	latest, err := ByNumber(ctx, client, nil)
+	latest, err := ByNumber(ctx, client, big.NewInt(int64(rpc.LatestBlockNumber)))
 	if err != nil {
 		t.Fatal(testutil.RedactRPCError(err, endpoint))
 	}
