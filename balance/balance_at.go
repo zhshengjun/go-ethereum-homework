@@ -1,4 +1,4 @@
-package contract
+package balance
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 )
 
 func BalanceAt(ctx context.Context, client *ethclient.Client, addr string) *big.Int {
-	balance, _ := client.BalanceAt(ctx, common.HexToAddress(addr), nil)
-	return balance
-
+	balance_, _ := client.BalanceAt(ctx, common.HexToAddress(addr), nil)
+	return balance_
 }

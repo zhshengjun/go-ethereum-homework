@@ -83,6 +83,7 @@ func SendTransaction(ctx context.Context, client *ethclient.Client,
 		Value:     amountWei,
 		Data:      input,
 	}
+
 	tx := types.NewTx(txData)
 	signedTx, err := types.SignTx(tx, types.NewLondonSigner(chainID), privateKey)
 	if err != nil {

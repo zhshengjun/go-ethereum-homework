@@ -1,0 +1,17 @@
+rpc:
+  url: https://eth-sepolia.g.alchemy.com/v2/xxxx
+  wss: wss://ethereum-sepolia-rpc.publicnode.com
+
+account:
+  from:
+    address: 0xb6600308201C23278F9216757EC212363bE93381
+    private: 00
+  to:
+    address: 0x
+    private: 00
+
+transaction:
+  hash: 0x
+
+erc20:
+  token: 0x

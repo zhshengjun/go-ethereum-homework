@@ -10,12 +10,13 @@ func TestSendERC20(t *testing.T) {
 	ctx, client, _ := testutil.IntegrationWSSClient(t)
 	_, privateKey := testutil.AccountFrom(t)
 	address, _ := testutil.AccountTo(t)
+	token := testutil.ERC20Token(t)
 	receipt := SendERC20(
 		ctx,
 		client,
 		privateKey,
 		address,
-		"0x779877A7B0D9E8603169DdbD7836e478b4624789",
+		token,
 		5*1e18,
 	)
 

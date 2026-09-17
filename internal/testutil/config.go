@@ -83,6 +83,10 @@ func TransactionHashHex(t testing.TB) string {
 	return configValue(t, "transaction.hash")
 }
 
+func ERC20Token(t testing.TB) string {
+	return configValue(t, "erc20.token")
+}
+
 // AccountFrom 获取账号
 func AccountFrom(t testing.TB) (string, string) {
 	address := configValue(t, "account.from.address")
@@ -94,6 +98,5 @@ func AccountFrom(t testing.TB) (string, string) {
 func AccountTo(t testing.TB) (string, string) {
 	address := configValue(t, "account.to.address")
 	private := configValue(t, "account.to.private")
-
 	return address, private
 }

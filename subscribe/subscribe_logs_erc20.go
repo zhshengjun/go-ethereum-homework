@@ -7,11 +7,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
 const erc20ABI_Event_Json = `
@@ -45,13 +47,14 @@ func Logs(
 	contractAddress common.Address,
 	maxLogs int,
 ) error {
-
+	logsCh := make(chan types.Log)
 	parsedABI, err := abi.JSON(strings.NewReader(erc20ABI_Event_Json))
 	if err != nil {
 		return err
 	}
 
 	transferEvent, ok := parsedABI.Events["Transfer"]
+	approvalEvent, ok := parsedABI.Events["Approval"]
 	if !ok {
 		return fmt.Errorf("Transfer event not found")
 	}
@@ -61,9 +64,7 @@ func Logs(
 		contractAddress.Hex(),
 	)
 
-	logsCh := make(chan types.Log)
-
-	filter := map[string]any{
+	/*filter := map[string]any{
 		"address": contractAddress,
 		"topics": [][]common.Hash{
 			{transferEvent.ID},
@@ -81,8 +82,18 @@ func Logs(
 	)
 	if err != nil {
 		return fmt.Errorf("EthSubscribe failed: %w", err)
-	}
+	}*/
 
+	filter2 := ethereum.FilterQuery{
+		// 这里增加了开始的区块，没有这个，默认是创世块，会超过50000，上面注释的就是不默认添加 创世块条件
+		FromBlock: big.NewInt(int64(rpc.LatestBlockNumber)),
+		Addresses: []common.Address{contractAddress},
+		Topics:    [][]common.Hash{{transferEvent.ID}, {approvalEvent.ID}},
+	}
+	sub, err := client.SubscribeFilterLogs(ctx, filter2, logsCh)
+	if err != nil {
+		return fmt.Errorf("EthSubscribe Filter failed: %w", err)
+	}
 	defer sub.Unsubscribe()
 
 	received := 0
